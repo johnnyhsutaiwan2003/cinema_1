@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣逛街電影地圖 | Taiwan Venue Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        .modal-active { display: flex; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-indigo-600">🛍️ 台灣逛街電影地圖</h1>
+        </nav>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" id="searchInput" placeholder="搜尋名稱..." class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select id="regionFilter" class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none">
+                    <option value="全區">所有地區</option>
+                    <option value="北部">北部</option>
+                    <option value="中部">中部</option>
+                    <option value="南部">南部</option>
+                </select>
+                <select id="typeFilter" class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none">
+                    <option value="全部">所有類型</option>
+                    <option value="百貨公司">百貨公司</option>
+                    <option value="購物中心">購物中心</option>
+                    <option value="電影院">電影院</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Items injected by JS -->
+        </div>
+    </main>
+
+    <div id="modalBackdrop" class="modal-backdrop items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+            <h2 id="modalTitle" class="text-2xl font-bold mb-2"></h2>
+            <div id="modalContent" class="text-gray-600 space-y-3"></div>
+            <button onclick="closeModal()" class="mt-6 w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        const venues = [
+            { id: 1, name: "台北 101", type: "百貨公司", region: "北部", address: "台北市信義區信義路五段7號", desc: "台灣地標，擁有頂級精品、觀景台與美食廣場。" },
+            { id: 2, name: "信義威秀影城", type: "電影院", region: "北部", address: "台北市信義區松壽路20號", desc: "台北最具指標性的電影城，商圈核心。" },
+            { id: 3, name: "勤美 誠品綠園道", type: "購物中心", region: "中部", address: "台中市西區公益路68號", desc: "充滿文藝氣息的購物空間，結合綠園道景觀。" },
+            { id: 4, name: "漢神巨蛋購物廣場", type: "百貨公司", region: "南部", address: "高雄市左營區博愛二路777號", desc: "高雄人氣指標，集結時尚與美食的旗艦百貨。" },
+            { id: 5, name: "新光三越 台南新天地", type: "百貨公司", region: "南部", address: "台南市中西區西門路一段658號", desc: "南台灣最具規模的百貨群，活動豐富。" },
+            { id: 6, name: "台中秀泰影城", type: "電影院", region: "中部", address: "台中市東區南京路66號", desc: "結合書香氣息的影城，舒適的觀影體驗。" },
+            { id: 7, name: "微風南山", type: "百貨公司", region: "北部", address: "台北市信義區松智路17號", desc: "時尚與潮流的前衛指標，擁有眾多獨家餐飲。" },
+            { id: 8, name: "大魯閣草衙道", type: "購物中心", region: "南部", address: "高雄市前鎮區中安路1-1號", desc: "擁有大型遊樂設施與購物體驗的親子樂園。" },
+            { id: 9, name: "台中大遠百", type: "百貨公司", region: "中部", address: "台中市西屯區台灣大道三段251號", desc: "全台營業額名列前茅的百貨之一，品牌齊全。" }
+        ];
+
+        const render = (data) => {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = data.map(item => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold mb-3">${item.type}</span>
+                    <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+                    <p class="text-gray-500 text-sm mb-4">📍 ${item.address}</p>
+                    <button onclick="openModal(${item.id})" class="w-full py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition">查看詳情</button>
+                </div>
+            `).join('');
+        };
+
+        const openModal = (id) => {
+            const venue = venues.find(v => v.id === id);
+            if (!venue) return;
+            
+            document.getElementById('modalTitle').innerText = venue.name;
+            document.getElementById('modalContent').innerHTML = `
+                <p><strong>類型：</strong>${venue.type}</p>
+                <p><strong>地區：</strong>${venue.region}</p>
+                <p><strong>地址：</strong>${venue.address}</p>
+                <p class="mt-2 text-gray-700 italic">"${venue.desc}"</p>
+            `;
+            document.getElementById('modalBackdrop').classList.add('modal-active');
+        };
+
+        const closeModal = () => {
+            document.getElementById('modalBackdrop').classList.remove('modal-active');
+        };
+
+        const filterData = () => {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const region = document.getElementById('regionFilter').value;
+            const type = document.getElementById('typeFilter').value;
+
+            const filtered = venues.filter(v => {
+                const matchesSearch = v.name.toLowerCase().includes(search);
+                const matchesRegion = (region === "全區" || v.region === region);
+                const matchesType = (type === "全部" || v.type === type);
+                return matchesSearch && matchesRegion && matchesType;
+            });
+            render(filtered);
+        };
+
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('input', filterData);
+        });
+
+        // Initial load
+        render(venues);
+    </script>
+</body>
+</html>
