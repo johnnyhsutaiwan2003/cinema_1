@@ -3,135 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣逛街電影地圖 | Taiwan Venue Hub</title>
+    <title>Taiwan Venue Hub | 台灣質感空間指南</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .modal-backdrop {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f8fafc;
         }
-        .modal-active { display: flex; }
+        
+        /* Drawer Overlay */
+        .drawer-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+            backdrop-filter: blur(4px);
+        }
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Left Navigation Drawer */
+        .nav-drawer {
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-drawer.active {
+            transform: translateX(0);
+        }
+
+        /* Right Detail Panel */
+        .detail-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .detail-panel.active {
+            transform: translateX(0);
+        }
+
+        /* Card Hover Effect */
+        .venue-card {
+            transition: all 0.3s ease;
+        }
+        .venue-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom Scrollbar for details */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="text-slate-800 antialiased overflow-x-hidden">
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-indigo-600">🛍️ 台灣逛街電影地圖</h1>
-        </nav>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4 py-8">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="searchInput" placeholder="搜尋名稱..." class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <select id="regionFilter" class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none">
-                    <option value="全區">所有地區</option>
-                    <option value="北部">北部</option>
-                    <option value="中部">中部</option>
-                    <option value="南部">南部</option>
-                </select>
-                <select id="typeFilter" class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none">
-                    <option value="全部">所有類型</option>
-                    <option value="百貨公司">百貨公司</option>
-                    <option value="購物中心">購物中心</option>
-                    <option value="電影院">電影院</option>
-                </select>
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleNav()" class="text-slate-500 hover:text-slate-900 focus:outline-none p-2 rounded-md hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-lg font-bold tracking-wider text-slate-800">VENUE HUB <span class="text-slate-400 font-normal text-sm ml-2 hidden sm:inline">台灣質感空間指南</span></h1>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="搜尋名稱或地點..." class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 w-48 sm:w-64 transition-all">
             </div>
         </div>
+    </header>
 
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Items injected by JS -->
+    <!-- Overlay for both Drawers -->
+    <div id="mainOverlay" onclick="closeAllDrawers()" class="drawer-overlay fixed inset-0 bg-slate-900/40 z-40"></div>
+
+    <!-- Left Navigation Drawer -->
+    <aside id="navDrawer" class="nav-drawer fixed inset-y-0 left-0 w-64 bg-white shadow-2xl z-50 flex flex-col">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">探索分類</h2>
+            <button onclick="toggleNav()" class="text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="setCategory('all')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="all">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i> 顯示全部
+            </button>
+            <button onclick="setCategory('mall')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="mall">
+                <i class="fa-solid fa-bag-shopping w-5 text-center"></i> 百貨商城 / Outlets
+            </button>
+            <button onclick="setCategory('cinema')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="cinema">
+                <i class="fa-solid fa-film w-5 text-center"></i> 電影院 / 影城
+            </button>
+        </nav>
+        <div class="p-6 text-xs text-slate-400">
+            Taiwan Venue Hub © 2026
+        </div>
+    </aside>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-8 flex justify-between items-end border-b border-slate-200 pb-4">
+            <div>
+                <h2 id="pageTitle" class="text-3xl font-bold text-slate-800 tracking-tight">所有空間</h2>
+                <p id="pageSubtitle" class="text-slate-500 mt-1">探索台灣各地的優質休閒去處</p>
+            </div>
+            <div class="text-sm text-slate-400 font-medium"><span id="resultCount">0</span> 個結果</div>
+        </div>
+
+        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards injected by JS -->
         </div>
     </main>
 
-    <div id="modalBackdrop" class="modal-backdrop items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
-            <h2 id="modalTitle" class="text-2xl font-bold mb-2"></h2>
-            <div id="modalContent" class="text-gray-600 space-y-3"></div>
-            <button onclick="closeModal()" class="mt-6 w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">關閉</button>
+    <!-- Right Detail Panel (Slide-over) -->
+    <aside id="detailPanel" class="detail-panel fixed inset-y-0 right-0 w-full md:w-[32rem] bg-white shadow-2xl z-50 flex flex-col">
+        <div class="relative h-48 bg-slate-800 flex-shrink-0 flex flex-col justify-end p-8 overflow-hidden">
+            <!-- Subtle background pattern/gradient -->
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-300 via-slate-800 to-slate-900"></div>
+            <button onclick="closeDetails()" class="absolute top-6 right-6 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="relative z-10">
+                <span id="detailBadge" class="inline-block px-3 py-1 bg-white/20 text-white backdrop-blur-md rounded-full text-xs font-medium tracking-wider mb-3"></span>
+                <h2 id="detailTitle" class="text-3xl font-bold text-white tracking-tight leading-tight"></h2>
+            </div>
         </div>
-    </div>
-
-    <script>
-        const venues = [
-            { id: 1, name: "台北 101", type: "百貨公司", region: "北部", address: "台北市信義區信義路五段7號", desc: "台灣地標，擁有頂級精品、觀景台與美食廣場。" },
-            { id: 2, name: "信義威秀影城", type: "電影院", region: "北部", address: "台北市信義區松壽路20號", desc: "台北最具指標性的電影城，商圈核心。" },
-            { id: 3, name: "勤美 誠品綠園道", type: "購物中心", region: "中部", address: "台中市西區公益路68號", desc: "充滿文藝氣息的購物空間，結合綠園道景觀。" },
-            { id: 4, name: "漢神巨蛋購物廣場", type: "百貨公司", region: "南部", address: "高雄市左營區博愛二路777號", desc: "高雄人氣指標，集結時尚與美食的旗艦百貨。" },
-            { id: 5, name: "新光三越 台南新天地", type: "百貨公司", region: "南部", address: "台南市中西區西門路一段658號", desc: "南台灣最具規模的百貨群，活動豐富。" },
-            { id: 6, name: "台中秀泰影城", type: "電影院", region: "中部", address: "台中市東區南京路66號", desc: "結合書香氣息的影城，舒適的觀影體驗。" },
-            { id: 7, name: "微風南山", type: "百貨公司", region: "北部", address: "台北市信義區松智路17號", desc: "時尚與潮流的前衛指標，擁有眾多獨家餐飲。" },
-            { id: 8, name: "大魯閣草衙道", type: "購物中心", region: "南部", address: "高雄市前鎮區中安路1-1號", desc: "擁有大型遊樂設施與購物體驗的親子樂園。" },
-            { id: 9, name: "台中大遠百", type: "百貨公司", region: "中部", address: "台中市西屯區台灣大道三段251號", desc: "全台營業額名列前茅的百貨之一，品牌齊全。" },
-            { id: 10, name: "京站時尚廣場", type: "購物中心", region: "北部", address: "台北市大同區承德路一段1號", desc: "與台北車站共構，交通便利的流行購物中心。" },
-            { id: 11, name: "遠百信義A13", type: "百貨公司", region: "北部", address: "台北市信義區松仁路58號", desc: "結合科技與台灣在地文化的現代化百貨。" },
-            { id: 12, name: "國賓大戲院", type: "電影院", region: "北部", address: "台北市萬華區成都路88號", desc: "歷史悠久的知名影城，西門町的觀影地標。" },
-            { id: 13, name: "台中大遠百威秀影城", type: "電影院", region: "中部", address: "台中市西屯區台灣大道三段251號13樓", desc: "中部設備頂級的連鎖影城，提供極致視聽享受。" },
-            { id: 14, name: "廣三SOGO百貨", type: "百貨公司", region: "中部", address: "台中市西區台灣大道二段459號", desc: "台中老字號日系百貨，購物與美食選擇豐富。" },
-            { id: 15, name: "夢時代購物中心", type: "購物中心", region: "南部", address: "高雄市前鎮區中華五路789號", desc: "南台灣最大購物中心，擁有頂樓摩天輪。" },
-            { id: 16, name: "南紡購物中心", type: "購物中心", region: "南部", address: "台南市東區中華東路一段366號", desc: "台南東區最大的複合式購物與娛樂中心。" },
-            { id: 17, name: "高雄大遠百威秀影城", type: "電影院", region: "南部", address: "高雄市苓雅區三多四路21號13樓", desc: "位於三多商圈，交通便利且設備新穎。" }
-        ];
-
-        const render = (data) => {
-            const grid = document.getElementById('resultsGrid');
-            grid.innerHTML = data.map(item => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold mb-3">${item.type}</span>
-                    <h3 class="text-xl font-bold mb-2">${item.name}</h3>
-                    <p class="text-gray-500 text-sm mb-4">📍 ${item.address}</p>
-                    <button onclick="openModal(${item.id})" class="w-full py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition">查看詳情</button>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-slate-50">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+                <p id="detailDesc" class="text-slate-600 text-lg font-medium leading-relaxed"></p>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-start gap-3 text-slate-500">
+                    <i class="fa-solid fa-location-dot mt-1 text-indigo-500"></i>
+                    <span id="detailAddress" class="text-sm"></span>
                 </div>
-            `).join('');
+            </div>
+
+            <div class="space-y-6">
+                <div class="info-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-regular fa-clock"></i> 開業時間</h3>
+                    <p id="detailOpened" class="text-slate-800 font-medium"></p>
+                </div>
+                
+                <div class="info-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 歷史與背景</h3>
+                    <p id="detailHistory" class="text-slate-700 leading-relaxed text-sm"></p>
+                </div>
+
+                <div class="info-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> 現況介紹</h3>
+                    <p id="detailStatus" class="text-slate-700 leading-relaxed text-sm"></p>
+                </div>
+
+                <div class="info-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-star"></i> 主力配置 / 商店</h3>
+                    <p id="detailAnchor" class="text-slate-800 font-medium text-sm bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="info-group bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-regular fa-building"></i> 建築樓層</h3>
+                        <p id="detailBuilding" class="text-slate-700 text-sm"></p>
+                    </div>
+                    <div class="info-group bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-square-parking"></i> 停車資訊</h3>
+                        <p id="detailParking" class="text-slate-700 text-sm"></p>
+                    </div>
+                </div>
+
+                <div class="info-group bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-train-subway"></i> 乘車指南</h3>
+                    <p id="detailTransport" class="text-slate-700 text-sm leading-relaxed"></p>
+                </div>
+
+                <div class="info-group">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-seedling"></i> 未來展望</h3>
+                    <p id="detailFuture" class="text-slate-700 text-sm italic border-l-4 border-slate-300 pl-3"></p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Load Data and Logic -->
+    <script src="venues.js"></script>
+    <script>
+        let currentCategory = 'all';
+
+        // DOM Elements
+        const resultsGrid = document.getElementById('resultsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const mainOverlay = document.getElementById('mainOverlay');
+        const navDrawer = document.getElementById('navDrawer');
+        const detailPanel = document.getElementById('detailPanel');
+        const resultCount = document.getElementById('resultCount');
+        const pageTitle = document.getElementById('pageTitle');
+
+        // Render Cards
+        const renderCards = (data) => {
+            if(data.length === 0) {
+                resultsGrid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">找不到符合條件的空間。</div>`;
+                resultCount.innerText = 0;
+                return;
+            }
+
+            resultCount.innerText = data.length;
+            resultsGrid.innerHTML = data.map(item => {
+                const icon = item.category === 'mall' ? 'fa-bag-shopping' : 'fa-film';
+                const color = item.category === 'mall' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50';
+                
+                return `
+                <div onclick="openDetails('${item.id}')" class="venue-card cursor-pointer group bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-100 group-hover:bg-indigo-500 transition-colors"></div>
+                    
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 ${color} rounded-md text-xs font-bold tracking-wider">
+                            <i class="fa-solid ${icon}"></i> ${item.typeLabel}
+                        </span>
+                        <span class="text-slate-400 text-xs font-medium border border-slate-200 px-2 py-0.5 rounded">${item.region}</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors leading-tight">${item.name}</h3>
+                    <p class="text-slate-500 text-sm flex-1 mb-4 leading-relaxed">${item.shortDesc}</p>
+                    
+                    <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                        <span class="text-slate-400 text-xs truncate max-w-[80%]"><i class="fa-solid fa-location-dot mr-1"></i>${item.address}</span>
+                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
         };
 
-        const openModal = (id) => {
-            const venue = venues.find(v => v.id === id);
-            if (!venue) return;
-            
-            document.getElementById('modalTitle').innerText = venue.name;
-            document.getElementById('modalContent').innerHTML = `
-                <p><strong>類型：</strong>${venue.type}</p>
-                <p><strong>地區：</strong>${venue.region}</p>
-                <p><strong>地址：</strong>${venue.address}</p>
-                <p class="mt-2 text-gray-700 italic">"${venue.desc}"</p>
-            `;
-            document.getElementById('modalBackdrop').classList.add('modal-active');
-        };
-
-        const closeModal = () => {
-            document.getElementById('modalBackdrop').classList.remove('modal-active');
-        };
-
+        // Filter Logic
         const filterData = () => {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const region = document.getElementById('regionFilter').value;
-            const type = document.getElementById('typeFilter').value;
-
+            const query = searchInput.value.toLowerCase();
             const filtered = venues.filter(v => {
-                const matchesSearch = v.name.toLowerCase().includes(search);
-                const matchesRegion = (region === "全區" || v.region === region);
-                const matchesType = (type === "全部" || v.type === type);
-                return matchesSearch && matchesRegion && matchesType;
+                const matchCat = currentCategory === 'all' || v.category === currentCategory;
+                const matchSearch = v.name.toLowerCase().includes(query) || v.address.toLowerCase().includes(query);
+                return matchCat && matchSearch;
             });
-            render(filtered);
+            renderCards(filtered);
         };
 
-        document.querySelectorAll('input, select').forEach(el => {
-            el.addEventListener('input', filterData);
-        });
+        // Category Selection
+        const setCategory = (cat) => {
+            currentCategory = cat;
+            
+            // Update UI
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.cat === cat) {
+                    btn.classList.add('bg-indigo-50', 'text-indigo-700');
+                    btn.classList.remove('text-slate-700');
+                } else {
+                    btn.classList.remove('bg-indigo-50', 'text-indigo-700');
+                    btn.classList.add('text-slate-700');
+                }
+            });
 
-        // Initial load
-        render(venues);
+            // Update Title
+            if(cat === 'mall') pageTitle.innerText = "百貨商城 / Outlets";
+            else if(cat === 'cinema') pageTitle.innerText = "電影院 / 影城";
+            else pageTitle.innerText = "所有空間";
+
+            filterData();
+            closeNav();
+        };
+
+        // Open Detail Panel
+        const openDetails = (id) => {
+            const venue = venues.find(v => v.id === id);
+            if(!venue) return;
+
+            document.getElementById('detailTitle').innerText = venue.name;
+            document.getElementById('detailBadge').innerHTML = `<i class="fa-solid ${venue.category === 'mall' ? 'fa-bag-shopping' : 'fa-film'} mr-1"></i> ${venue.typeLabel}`;
+            document.getElementById('detailDesc').innerText = venue.shortDesc;
+            document.getElementById('detailAddress').innerText = venue.address;
+            
+            // Detail Fields
+            document.getElementById('detailOpened').innerText = venue.details.opened || '無資料';
+            document.getElementById('detailHistory').innerText = venue.details.history || '無資料';
+            document.getElementById('detailStatus').innerText = venue.details.status || '無資料';
+            document.getElementById('detailAnchor').innerText = venue.details.anchorStores || '無資料';
+            document.getElementById('detailBuilding').innerText = venue.details.building || '無資料';
+            document.getElementById('detailParking').innerText = venue.details.parking || '無資料';
+            document.getElementById('detailTransport').innerText = venue.details.transport || '無資料';
+            document.getElementById('detailFuture').innerText = venue.details.future || '無資料';
+
+            detailPanel.classList.add('active');
+            mainOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent body scroll
+        };
+
+        // Drawer Controls
+        const toggleNav = () => {
+            const isActive = navDrawer.classList.contains('active');
+            if(isActive) closeAllDrawers();
+            else {
+                navDrawer.classList.add('active');
+                mainOverlay.classList.add('active');
+            }
+        };
+
+        const closeNav = () => {
+            navDrawer.classList.remove('active');
+            if(!detailPanel.classList.contains('active')) {
+                mainOverlay.classList.remove('active');
+            }
+        };
+
+        const closeDetails = () => {
+            detailPanel.classList.remove('active');
+            if(!navDrawer.classList.contains('active')) {
+                mainOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        const closeAllDrawers = () => {
+            navDrawer.classList.remove('active');
+            detailPanel.classList.remove('active');
+            mainOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        // Event Listeners
+        searchInput.addEventListener('input', filterData);
+
+        // Init
+        setCategory('all');
     </script>
 </body>
 </html>
