@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E41RL1GF7T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E41RL1GF7T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dcard 閒聊板分析 | Taiwan Venue Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a18;
+            --paper: #faf8f4;
+            --accent: #c8642d;
+            --accent-soft: #e8d9c8;
+            --muted: #8a8478;
+            --line: #e6e0d6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Inter", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .serif-disp { font-weight: 800; letter-spacing: -0.02em; }
+        .fade-in { animation: fadeIn .5s ease both; }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
+        .stagger > * { animation: fadeIn .5s ease both; }
+        .stagger > *:nth-child(2){animation-delay:.07s}
+        .stagger > *:nth-child(3){animation-delay:.14s}
+        .stagger > *:nth-child(4){animation-delay:.21s}
+        .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; }
+        .stat-card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px 24px; }
+        .tag { display:inline-block; font-size:.7rem; font-weight:600; letter-spacing:.05em; padding:3px 10px; border-radius:99px; background:var(--accent-soft); color:var(--accent); }
+        .hero-grain { background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+        .chart-img { width:100%; border-radius:10px; border:1px solid var(--line); }
+        .table-row:not(:last-child) { border-bottom: 1px solid var(--line); }
+        .rank-bar-wrap { background:var(--line); height:6px; border-radius:3px; overflow:hidden; margin-top:4px; }
+        .rank-bar { height:6px; border-radius:3px; background:var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<header class="sticky top-0 z-40 backdrop-blur bg-[rgba(250,248,244,.85)] border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2 group mr-auto">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background:var(--accent)">
+                <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <span class="serif-disp text-lg">Taiwan Venue Hub</span>
+        </a>
+        <a href="ptt-food-analysis.html" class="text-sm px-4 py-2 rounded-xl border hover:bg-black/5 transition hidden sm:inline-flex items-center gap-1" style="border-color:var(--line); color:var(--muted)">
+            <i class="fa-solid fa-utensils mr-1"></i>PTT Food 分析
+        </a>
+        <a href="index.html" class="text-sm px-4 py-2 rounded-xl border hover:bg-black/5 transition" style="border-color:var(--line); color:var(--muted)">
+            <i class="fa-solid fa-arrow-left mr-1"></i>返回首頁
+        </a>
+    </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero-grain border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-5 py-14 fade-in">
+        <span class="tag mb-4">資料分析</span>
+        <h1 class="serif-disp text-4xl md:text-5xl mt-3 mb-4">Dcard 閒聊板分析報告</h1>
+        <p class="text-lg" style="color:var(--muted); max-width:560px;">
+            使用 Firecrawl 抓取 Dcard 閒聊板（/f/talk）前 30 則貼文，以 AntV 圖表視覺化呈現熱門話題、互動數據與內容趨勢。
+        </p>
+        <div class="flex flex-wrap gap-3 mt-6 text-sm" style="color:var(--muted)">
+            <span><i class="fa-regular fa-calendar mr-1"></i>2025/6/17 抓取</span>
+            <span><i class="fa-regular fa-file-lines mr-1"></i>前 30 則貼文</span>
+            <span><i class="fa-solid fa-fire mr-1"></i>資料來源：Dcard 閒聊板</span>
+            <span><i class="fa-solid fa-chart-bar mr-1"></i>圖表：AntV chart-visualization</span>
+        </div>
+    </div>
+</section>
+
+<!-- ===== KPI ===== -->
+<section class="max-w-6xl mx-auto px-5 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">最高讚數</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">290</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">公車司機帶全車買刈包</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">最多留言</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">144</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">從科技業轉入八大</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">平均讚數</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">58</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">前 30 則均值</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">最熱話題</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">社會</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">社會新聞佔 27%</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== 文字雲 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-8">
+    <div class="card fade-in">
+        <h2 class="serif-disp text-xl mb-1">熱門關鍵字文字雲</h2>
+        <p class="text-sm mb-5" style="color:var(--muted)">從 30 篇貼文標題萃取的高頻關鍵字，字體越大代表出現越頻繁</p>
+        <img src="https://mdn.alipayobjects.com/one_clip/afts/img/If_FRrRM9FEAAAAAUnAAAAgAoEACAQFr/original"
+             alt="Dcard 閒聊板熱門關鍵字文字雲" class="chart-img">
+    </div>
+</section>
+
+<!-- ===== 圖表 Row 1 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-8">
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">按讚數 Top 10</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">最受歡迎文章排行</p>
+            <img src="https://mdn.alipayobjects.com/one_clip/afts/img/fDPDQLguTiMAAAAATGAAAAgAoEACAQFr/original"
+                 alt="按讚數排行" class="chart-img">
+        </div>
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">話題分類分布</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">30 則貼文的話題類別佔比</p>
+            <img src="https://mdn.alipayobjects.com/one_clip/afts/img/9tyMQbL21kMAAAAAS2AAAAgAoEACAQFr/original"
+                 alt="話題分類圓餅圖" class="chart-img">
+        </div>
+    </div>
+</section>
+
+<!-- ===== 雙軸圖 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-8">
+    <div class="card fade-in">
+        <h2 class="serif-disp text-xl mb-1">按讚 vs 留言數對比（熱門文前10）</h2>
+        <p class="text-sm mb-5" style="color:var(--muted)">柱狀為按讚數，折線為留言數 — 部分文章留言熱絡但讚數不高，反映爭議性話題</p>
+        <img src="https://mdn.alipayobjects.com/one_clip/afts/img/g0wXQbPlXUsAAAAASkAAAAgAoEACAQFr/original"
+             alt="讚數與留言數雙軸對比" class="chart-img">
+    </div>
+</section>
+
+<!-- ===== 文章列表 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-16">
+    <div class="card fade-in">
+        <h2 class="serif-disp text-xl mb-1">前 30 則完整列表</h2>
+        <p class="text-sm mb-6" style="color:var(--muted)">依讚數由高到低排序</p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs uppercase tracking-widest" style="color:var(--muted); border-bottom:2px solid var(--line)">
+                        <th class="pb-3 pr-4">#</th>
+                        <th class="pb-3 pr-4">標題</th>
+                        <th class="pb-3 pr-4">發文者</th>
+                        <th class="pb-3 pr-3 text-center">👍</th>
+                        <th class="pb-3 pr-3 text-center">💬</th>
+                        <th class="pb-3 text-center">⭐</th>
+                    </tr>
+                </thead>
+                <tbody id="articleTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="border-t py-8 text-center text-sm" style="border-color:var(--line); color:var(--muted)">
+    資料抓取自 <a href="https://www.dcard.tw/f/talk" target="_blank" class="underline hover:text-[var(--accent)]">Dcard 閒聊板</a>，
+    使用 Firecrawl 抓取、AntV chart-visualization skill 生成圖表。
+    © 2025 Taiwan Venue Hub
+</footer>
+
+<script>
+const ARTICLES = [
+    {no:1, title:"公車司機開到一半帶全車去買刈包😂", author:"Foodie", time:"22h", likes:290, comments:17, saves:44},
+    {no:2, title:"店家私自拿我的手機給五星好評，這合理嗎？！", author:"國立勤益科大", time:"1d", likes:236, comments:35, saves:43},
+    {no:3, title:"男生沒事的時候都在玩鳥嗎？", author:"Housewife", time:"1d", likes:183, comments:121, saves:84},
+    {no:4, title:"「別碰我的羊！」59歲婦人一腳飛踢美洲獅", author:"國立屏東大學", time:"1d", likes:177, comments:16, saves:42},
+    {no:5, title:"一直放錯洞是不是故意的啦😡🔥", author:"中國文化大學", time:"21h", likes:147, comments:63, saves:66},
+    {no:6, title:"為什麼台灣一堆勸人不讀書的新聞？", author:"國立臺中科大", time:"1d", likes:123, comments:119, saves:51},
+    {no:7, title:"為什麼台灣人都喜歡摸摸雨", author:"Community Editor", time:"23h", likes:114, comments:11, saves:34},
+    {no:8, title:"欸河狸這可以養嗎！", author:"元智大學", time:"1d", likes:107, comments:4, saves:0},
+    {no:9, title:"鐵拳教育效應", author:"淡江大學", time:"1d", likes:77, comments:26, saves:30},
+    {no:10, title:"日最惡肇逃殺人犯「八田與一」4年逮不到", author:"國立屏東大學", time:"1d", likes:61, comments:13, saves:29},
+    {no:11, title:"這個是針孔嗎", author:"實踐大學", time:"22h", likes:58, comments:72, saves:41},
+    {no:12, title:"行動電源差點害死", author:"愛吃飯的狗狗", time:"18h", likes:47, comments:55, saves:24},
+    {no:13, title:"有人也和我一樣有資訊焦慮症嗎？", author:"中國醫藥大學", time:"4h", likes:36, comments:12, saves:5},
+    {no:14, title:"英國宣布 16 歲以下禁止使用社群媒體", author:"Housewife", time:"2h", likes:35, comments:5, saves:2},
+    {no:15, title:"買一台義式冰淇淋機值得嗎....", author:"真理大學", time:"3h", likes:33, comments:6, saves:2},
+    {no:16, title:"長輩差點被高利貸逼死", author:"嶺東科技大學", time:"1d", likes:27, comments:13, saves:0},
+    {no:17, title:"新竹租房騙子", author:"國立中山大學", time:"23h", likes:25, comments:15, saves:13},
+    {no:18, title:"土城警所長殉職…稚子悲吐「我很想有爸爸」", author:"賽莉耶", time:"1d", likes:25, comments:9, saves:1},
+    {no:19, title:"台女：我本來對 gay 都沒意見 這次開始討厭了", author:"國立東華大學", time:"20h", likes:23, comments:16, saves:17},
+    {no:20, title:"表演踩學校老師椅子真的 OK 嗎？", author:"景文科技大學", time:"21h", likes:14, comments:92, saves:5},
+    {no:21, title:"超商的善心店員", author:"Shop Assistant", time:"3h", likes:19, comments:3, saves:0},
+    {no:22, title:"有35歲之前就退休的 能分享怎說服自己嗎?", author:"嘟嘟嚕", time:"10h", likes:18, comments:44, saves:20},
+    {no:23, title:"英YouTuber炫燿用20蚊麻辣燙獵艷西安女教師", author:"北京大學", time:"23h", likes:15, comments:9, saves:6},
+    {no:24, title:"怕遠還做外送員", author:"零用錢", time:"3h", likes:15, comments:26, saves:2},
+    {no:25, title:"上彎壓槍會痛", author:"國立中正大學", time:"1d", likes:15, comments:14, saves:3},
+    {no:26, title:"相信酒後亂性", author:"仙女下凡", time:"21h", likes:16, comments:29, saves:14},
+    {no:27, title:"信用版跑帳真的會有人來討債嗎", author:"淡江大學", time:"19h", likes:21, comments:39, saves:8},
+    {no:28, title:"衛生部長回應為什麼沒有採檢 HIV 校車司機", author:"Aesthetic Physician", time:"1d", likes:13, comments:5, saves:8},
+    {no:29, title:"從科技業轉入八大", author:"咪咪貓貓", time:"10h", likes:65, comments:144, saves:67},
+    {no:30, title:"蛀牙一定要花那麼多錢嗎？", author:"文藻外語大學", time:"20h", likes:13, comments:37, saves:25},
+].sort((a,b) => b.likes - a.likes);
+
+const maxLikes = ARTICLES[0].likes;
+document.getElementById('articleTable').innerHTML = ARTICLES.map((a,i) => `
+    <tr class="table-row hover:bg-black/[.02] transition">
+        <td class="py-3 pr-4 text-xs font-bold" style="color:${i<3?'var(--accent)':'var(--muted)'}">${i+1}</td>
+        <td class="py-3 pr-4 font-medium" style="max-width:360px">${a.title}</td>
+        <td class="py-3 pr-3 text-xs whitespace-nowrap" style="color:var(--muted)">${a.author}</td>
+        <td class="py-3 pr-3 text-center text-xs font-bold" style="color:var(--accent)">${a.likes}</td>
+        <td class="py-3 pr-3 text-center text-xs" style="color:var(--muted)">${a.comments}</td>
+        <td class="py-3 text-center text-xs" style="color:var(--muted)">${a.saves || '—'}</td>
+    </tr>
+`).join('');
+</script>
+</body>
+</html>
