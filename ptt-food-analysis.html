@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E41RL1GF7T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E41RL1GF7T');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTT Food 板分析 | Taiwan Venue Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a18;
+            --paper: #faf8f4;
+            --accent: #c8642d;
+            --accent-soft: #e8d9c8;
+            --muted: #8a8478;
+            --line: #e6e0d6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Inter", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .serif-disp { font-weight: 800; letter-spacing: -0.02em; }
+        .fade-in { animation: fadeIn .5s ease both; }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
+        .stagger > * { animation: fadeIn .5s ease both; }
+        .stagger > *:nth-child(2){animation-delay:.07s}
+        .stagger > *:nth-child(3){animation-delay:.14s}
+        .stagger > *:nth-child(4){animation-delay:.21s}
+        .stagger > *:nth-child(5){animation-delay:.28s}
+        .stagger > *:nth-child(6){animation-delay:.35s}
+        .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; }
+        .stat-card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px 24px; }
+        .tag { display:inline-block; font-size:.7rem; font-weight:600; letter-spacing:.05em; padding:3px 10px; border-radius:99px; background:var(--accent-soft); color:var(--accent); }
+        .hero-grain { background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+        canvas { max-height: 280px; }
+        .rank-bar { height:8px; border-radius:4px; background:var(--accent); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+        .table-row:not(:last-child) { border-bottom: 1px solid var(--line); }
+    </style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<header class="sticky top-0 z-40 backdrop-blur bg-[rgba(250,248,244,.85)] border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2 group mr-auto">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background:var(--accent)">
+                <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <span class="serif-disp text-lg">Taiwan Venue Hub</span>
+        </a>
+        <a href="index.html" class="text-sm px-4 py-2 rounded-xl border hover:bg-black/5 transition" style="border-color:var(--line); color:var(--muted)">
+            <i class="fa-solid fa-arrow-left mr-1"></i>返回首頁
+        </a>
+    </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero-grain border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-5 py-14 fade-in">
+        <span class="tag mb-4">資料分析</span>
+        <h1 class="serif-disp text-4xl md:text-5xl mt-3 mb-4">PTT Food 板分析報告</h1>
+        <p class="text-lg" style="color:var(--muted); max-width:560px;">
+            抓取 PTT 美食板最新三頁（index6999～最新），時間範圍 2025/6/4–6/17，共 51 篇文章的資料視覺化。
+        </p>
+        <div class="flex flex-wrap gap-3 mt-6 text-sm" style="color:var(--muted)">
+            <span><i class="fa-regular fa-calendar mr-1"></i>2025/6/4 – 6/17</span>
+            <span><i class="fa-regular fa-file-lines mr-1"></i>51 篇文章</span>
+            <span><i class="fa-solid fa-users mr-1"></i>14 位作者</span>
+            <span><i class="fa-solid fa-location-dot mr-1"></i>資料來源：PTT Food 板</span>
+        </div>
+    </div>
+</section>
+
+<!-- ===== KPI STATS ===== -->
+<section class="max-w-6xl mx-auto px-5 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">總篇數</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">51</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">含食記、廣宣、轉文</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">活躍作者</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">14</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">前 3 名佔 50%</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">海外食記</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">~20%</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">以日本為主</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs uppercase tracking-widest mb-1" style="color:var(--muted)">最高推文數</p>
+            <p class="serif-disp text-3xl" style="color:var(--accent)">8 推</p>
+            <p class="text-sm mt-1" style="color:var(--muted)">Fat Jam 牛排館</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CHARTS ROW 1 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-10">
+    <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- 作者活躍度 -->
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">作者活躍度排行</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">各作者發文篇數（共 14 位作者）</p>
+            <canvas id="chartAuthor"></canvas>
+        </div>
+
+        <!-- 地區分布 -->
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">發文地區分布</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">台灣本島 vs 海外，及各縣市比例</p>
+            <canvas id="chartRegion"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CHARTS ROW 2 ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-10">
+    <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- 料理類型 -->
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">料理類型分布</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">依食記主題分類</p>
+            <canvas id="chartFood"></canvas>
+        </div>
+
+        <!-- 推文熱門榜 -->
+        <div class="card fade-in">
+            <h2 class="serif-disp text-xl mb-1">熱門文章推文排行</h2>
+            <p class="text-sm mb-5" style="color:var(--muted)">推文數最高的文章（三頁內）</p>
+            <div class="space-y-4 mt-2" id="pushRank"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ARTICLE TABLE ===== -->
+<section class="max-w-6xl mx-auto px-5 pb-16">
+    <div class="card fade-in">
+        <h2 class="serif-disp text-xl mb-1">文章完整列表</h2>
+        <p class="text-sm mb-6" style="color:var(--muted)">三頁食記詳細資料，依日期由新到舊</p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs uppercase tracking-widest" style="color:var(--muted); border-bottom:2px solid var(--line)">
+                        <th class="pb-3 pr-4">日期</th>
+                        <th class="pb-3 pr-4">標題</th>
+                        <th class="pb-3 pr-4">作者</th>
+                        <th class="pb-3 text-center">推文</th>
+                    </tr>
+                </thead>
+                <tbody id="articleTable"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="border-t py-8 text-center text-sm" style="border-color:var(--line); color:var(--muted)">
+    資料抓取自 <a href="https://www.ptt.cc/bbs/Food/index.html" target="_blank" class="underline hover:text-[var(--accent)]">PTT Food 板</a>，使用 Firecrawl 技術抓取與 Chart.js 視覺化。
+    © 2025 Taiwan Venue Hub
+</footer>
+
+<script>
+// ===== 資料 =====
+const AUTHORS = [
+    { name: 'chickenbo', count: 9 },
+    { name: 'Geiwoyujie', count: 8 },
+    { name: 'larle', count: 8 },
+    { name: 'yucon', count: 5 },
+    { name: 'setsutetsuya', count: 4 },
+    { name: 'meiwen1201', count: 4 },
+    { name: 'fitten', count: 2 },
+    { name: 'f77142002', count: 2 },
+    { name: 'Guyinkt', count: 2 },
+    { name: '其他', count: 7 },
+];
+
+const REGIONS = [
+    { name: '台北', count: 14 },
+    { name: '台南', count: 9 },
+    { name: '桃園', count: 7 },
+    { name: '日本', count: 9 },
+    { name: '新北', count: 5 },
+    { name: '花蓮', count: 2 },
+    { name: '屏東', count: 2 },
+    { name: '彰化', count: 1 },
+    { name: '高雄', count: 1 },
+    { name: '新竹', count: 2 },
+    { name: '其他海外', count: 1 },
+];
+
+const FOOD_TYPES = [
+    { name: '日式料理', count: 12 },
+    { name: '台式小吃', count: 11 },
+    { name: '早餐/輕食', count: 7 },
+    { name: '咖啡甜點', count: 8 },
+    { name: '燒烤類', count: 6 },
+    { name: '異國料理', count: 4 },
+    { name: '海鮮', count: 3 },
+];
+
+const HOT_POSTS = [
+    { title: 'Fat Jam 牛排館：太強大了！', location: '新北', push: 8 },
+    { title: '木侖花生糖 香黏花生糖及杏仁糖', location: '高雄鳳山', push: 4 },
+    { title: '台北可頌。民生社區 French Twist', location: '台北', push: 2 },
+    { title: '日本金澤 市場めし あまつぼ', location: '日本金澤', push: 1 },
+    { title: '台北吉林路 珍記米粉湯', location: '台北', push: 1 },
+];
+
+const ARTICLES = [
+    { date:'6/17', title:'[食記] 台北 信義 板前中山', author:'earth875', push:0 },
+    { date:'6/17', title:'[食記] 三統漢菓子 台北信義 流心蛋黃芋泥蛋黃酥', author:'Geiwoyujie', push:0 },
+    { date:'6/17', title:'[食記] 日本山形-半生不熟炸豬排-平田牧場', author:'Guyinkt', push:1 },
+    { date:'6/16', title:'[食記] 桃園蘆竹區。養身鱉 平價海產店', author:'larle', push:0 },
+    { date:'6/16', title:'[食記] 上鼎豐小籠湯包 台北大安 清爽鮮絲瓜湯包', author:'Geiwoyujie', push:0 },
+    { date:'6/15', title:'[食記] 屏東 枋寮 珈琲朗 隱密看海咖啡店', author:'yucon', push:0 },
+    { date:'6/15', title:'[食記] Shake Shack 菲律賓馬尼拉 漢堡紫薯奶昔', author:'Geiwoyujie', push:0 },
+    { date:'6/14', title:'[食記] 花蓮美食 十六食堂麵食飯食~超推紅油炒手', author:'meiwen1201', push:0 },
+    { date:'6/14', title:'[食記] 台北 Sconeholic 司康中毒', author:'yucon', push:0 },
+    { date:'6/14', title:'[食記] 台北市中正區。游記蟹殼黃', author:'larle', push:0 },
+    { date:'6/14', title:'[食記] 京都 南禪寺 順正 豆腐料理', author:'s1494041', push:0 },
+    { date:'6/14', title:'[食記] 泰式小吃 新北樹林 香酥層次碎豬肉煎蛋飯', author:'Geiwoyujie', push:0 },
+    { date:'6/13', title:'[食記] 大漢早點 花蓮市區 九層塔皮蛋肉鬆蛋餅', author:'Geiwoyujie', push:0 },
+    { date:'6/13', title:'[食記] 台北市中正區。林家乾麵', author:'larle', push:0 },
+    { date:'6/13', title:'[食記] 台北可頌。民生社區-French Twist Bakery', author:'f77142002', push:2 },
+    { date:'6/12', title:'[食記] 北海道 小樽 若鶏時代 なると 本店', author:'ms0204192', push:0 },
+    { date:'6/12', title:'[食記] 景美豆花 台北文山 Q彈包心粉圓焦香豆花', author:'Geiwoyujie', push:0 },
+    { date:'6/11', title:'[食記] 桃園市龜山區。辣食堂', author:'larle', push:0 },
+    { date:'6/11', title:'[食記] 日本富山高岡 牛屋-鐵-美味冰見和牛燒肉', author:'setsutetsuya', push:0 },
+    { date:'6/11', title:'[食記] 台南歸仁 高麗園銅盤烤肉', author:'fitten', push:0 },
+    { date:'6/11', title:'[食記] 回轉壽司北海道 日本鳥取 軟嫩比目魚壽司', author:'Geiwoyujie', push:1 },
+    { date:'6/10', title:'[食記] 新北金山 柳媽媽海鮮粥麵館~海鮮好吃', author:'meiwen1201', push:1 },
+    { date:'6/10', title:'[食記] 廣島｜燒鳥｜とり やまもと', author:'Lefair', push:0 },
+    { date:'6/10', title:'[食記] 木侖花生糖 高雄鳳山 香黏花生糖及杏仁糖', author:'Geiwoyujie', push:4 },
+    { date:'6/09', title:'[食記] 彰化 鹿港 東北季風咖啡 monsoon coffee', author:'yucon', push:0 },
+    { date:'6/09', title:'[食記] 新北 Fat Jam 牛排館：太強大了！', author:'KUNI0202', push:8 },
+    { date:'6/09', title:'[食記] 桃園市八德區。八德王記北平烤鴨', author:'larle', push:0 },
+    { date:'6/09', title:'Fw: [食記] 北海道 旭川拉麵村 青葉拉麵醬油湯頭好喝', author:'setsutetsuya', push:0 },
+    { date:'6/08', title:'[食記] 新北板橋 鄧食味麵食館~內用小米粥免費', author:'meiwen1201', push:0 },
+    { date:'6/08', title:'Fw: [食記] 日本金澤 市場めし あまつぼ', author:'setsutetsuya', push:1 },
+    { date:'6/08', title:'[食記] 台南東區 袋走蛋餅 好吃的粉漿蛋餅', author:'chickenbo', push:0 },
+    { date:'6/08', title:'[食記] 台南東區 柴堡早餐 新開幕平價早午餐', author:'chickenbo', push:0 },
+    { date:'6/07', title:'[廣宣] 台北 人氣烤鴨餐廳到信義', author:'sosold', push:1 },
+    { date:'6/06', title:'[食記] 台南中西 國華無名台式壽司攤 只要50元', author:'chickenbo', push:1 },
+    { date:'6/06', title:'[食記] 台南中西 老植酌 鮭魚井飯只要200元', author:'chickenbo', push:0 },
+    { date:'6/06', title:'[食記] 台北。中山國中站-金孫俱樂部燒肉 商午', author:'f77142002', push:0 },
+    { date:'6/06', title:'[食記] 台北吉林路 珍記米粉湯', author:'LoveFood', push:1 },
+    { date:'6/06', title:'[食記] 新竹市北區。彭成珍餅舖', author:'larle', push:0 },
+    { date:'6/05', title:'[食記] 桃園。豪千日式料理', author:'larle', push:0 },
+    { date:'6/05', title:'[食記] 桃園新屋-這家免費招待很飽-源松客家餐廳', author:'Guyinkt', push:0 },
+    { date:'6/05', title:'Fw: [食記] 日本石川小松機場餐廳 味の中石小松烏龍麵', author:'setsutetsuya', push:0 },
+    { date:'6/05', title:'[廣宣] 新竹 成功牛排 ~評論比壽星禮更吸引人', author:'pure816', push:0 },
+    { date:'6/05', title:'[食記] 新北林口 富品軒港式自助餐廳', author:'fitten', push:0 },
+    { date:'6/05', title:'[食記] 台南東區 焗的飽平價義式焗烤 100元起跳', author:'chickenbo', push:1 },
+    { date:'6/05', title:'[食記] 台南中西 裕生魚片專賣店 平價好吃新開幕', author:'chickenbo', push:1 },
+    { date:'6/04', title:'[食記] 屏東 恆春 墾丁 山男咖啡', author:'yucon', push:0 },
+    { date:'6/04', title:'[食記] 台南東區 阿牛牛肉湯 肉燥飯好吃的老店', author:'chickenbo', push:1 },
+    { date:'6/04', title:'[食記] 台南東區 譚媽媽蔥油餅涼麵 崇誨市場美食', author:'chickenbo', push:0 },
+    { date:'6/04', title:'[食記] 台北信義 老乾杯(信義店)商業午餐 肉質佳', author:'meiwen1201', push:0 },
+    { date:'6/04', title:'[食記] 桃園市中壢區。IHAWAN SA NANKAN', author:'larle', push:0 },
+];
+
+// ===== 共用顏色 =====
+const ACCENT = '#c8642d';
+const PALETTE = [
+    '#c8642d','#d4845a','#dfa487','#8a6a52','#5c4033',
+    '#b5a38a','#e8c9a0','#a07855','#6e5040','#bba590',
+];
+
+// ===== Chart 1: 作者 =====
+new Chart(document.getElementById('chartAuthor'), {
+    type: 'bar',
+    data: {
+        labels: AUTHORS.map(a => a.name),
+        datasets: [{
+            label: '篇數',
+            data: AUTHORS.map(a => a.count),
+            backgroundColor: AUTHORS.map((_, i) => i < 3 ? ACCENT : '#d4c4b0'),
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#e6e0d6' }, ticks: { stepSize: 2 } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// ===== Chart 2: 地區 =====
+new Chart(document.getElementById('chartRegion'), {
+    type: 'doughnut',
+    data: {
+        labels: REGIONS.map(r => r.name),
+        datasets: [{
+            data: REGIONS.map(r => r.count),
+            backgroundColor: PALETTE,
+            borderWidth: 2,
+            borderColor: '#faf8f4',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right', labels: { boxWidth: 12, padding: 14, font: { size: 12 } } }
+        },
+        cutout: '62%',
+    }
+});
+
+// ===== Chart 3: 料理類型 =====
+new Chart(document.getElementById('chartFood'), {
+    type: 'bar',
+    data: {
+        labels: FOOD_TYPES.map(f => f.name),
+        datasets: [{
+            label: '篇數',
+            data: FOOD_TYPES.map(f => f.count),
+            backgroundColor: PALETTE,
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { beginAtZero: true, grid: { color: '#e6e0d6' } },
+            y: { grid: { display: false } }
+        }
+    }
+});
+
+// ===== 推文排行（手繪式排行條） =====
+const maxPush = HOT_POSTS[0].push;
+document.getElementById('pushRank').innerHTML = HOT_POSTS.map((p, i) => `
+    <div>
+        <div class="flex items-center justify-between mb-1">
+            <span class="font-medium text-sm" style="color:var(--ink)">${i + 1}. ${p.title}</span>
+            <span class="text-xs font-bold ml-3 shrink-0" style="color:var(--accent)">${p.push} 推</span>
+        </div>
+        <p class="text-xs mb-2" style="color:var(--muted)">${p.location}</p>
+        <div style="background:var(--line); height:8px; border-radius:4px; overflow:hidden">
+            <div class="rank-bar" style="width:${Math.round(p.push/maxPush*100)}%"></div>
+        </div>
+    </div>
+`).join('');
+
+// ===== 文章列表 =====
+document.getElementById('articleTable').innerHTML = ARTICLES.map(a => `
+    <tr class="table-row hover:bg-black/[.02] transition">
+        <td class="py-3 pr-4 text-xs whitespace-nowrap" style="color:var(--muted)">${a.date}</td>
+        <td class="py-3 pr-4 font-medium" style="max-width:360px">${a.title}</td>
+        <td class="py-3 pr-4 text-xs whitespace-nowrap" style="color:var(--muted)">${a.author}</td>
+        <td class="py-3 text-center">
+            ${a.push > 0
+                ? `<span class="text-xs font-bold" style="color:var(--accent)">${a.push}</span>`
+                : `<span class="text-xs" style="color:var(--line)">—</span>`}
+        </td>
+    </tr>
+`).join('');
+</script>
+</body>
+</html>
