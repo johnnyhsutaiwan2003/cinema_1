@@ -15,349 +15,295 @@
     <title>Taiwan Venue Hub | 台灣質感空間指南</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f8fafc;
+        :root {
+            --ink: #1a1a18;
+            --paper: #faf8f4;
+            --accent: #c8642d;
+            --accent-soft: #e8d9c8;
+            --muted: #8a8478;
+            --line: #e6e0d6;
         }
-        
-        /* Drawer Overlay */
-        .drawer-overlay {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-            backdrop-filter: blur(4px);
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Anthropic Sans", "Inter", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
-        .drawer-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Left Navigation Drawer */
-        .nav-drawer {
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .nav-drawer.active {
-            transform: translateX(0);
-        }
-
-        /* Right Detail Panel */
-        .detail-panel {
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .detail-panel.active {
-            transform: translateX(0);
-        }
-
-        /* Card Hover Effect */
-        .venue-card {
-            transition: all 0.3s ease;
-        }
-        .venue-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Custom Scrollbar for details */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        .serif-disp { font-weight: 800; letter-spacing: -0.02em; }
+        .fade-in { animation: fadeIn .5s ease both; }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
+        .stagger > * { animation: fadeIn .5s ease both; }
+        .stagger > *:nth-child(2){animation-delay:.05s}
+        .stagger > *:nth-child(3){animation-delay:.1s}
+        .stagger > *:nth-child(4){animation-delay:.15s}
+        .stagger > *:nth-child(5){animation-delay:.2s}
+        .stagger > *:nth-child(6){animation-delay:.25s}
+        .card-hover { transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(0,0,0,.25); border-color: var(--accent); }
+        .drawer { transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+        .overlay { transition: opacity .3s; }
+        ::-webkit-scrollbar { width: 9px; }
+        ::-webkit-scrollbar-thumb { background: #d8d0c4; border-radius: 9px; }
+        .pill { transition: all .2s; }
+        .pill:hover { background: var(--ink); color: var(--paper); }
+        .hero-grain { background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+        .detail-prose h4 { font-weight:700; margin: 0 0 4px; color: var(--ink); }
+        .detail-prose p { color: #4a463e; line-height: 1.7; margin: 0; }
     </style>
 </head>
-<body class="text-slate-800 antialiased overflow-x-hidden">
+<body>
 
-    <!-- Navbar -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleNav()" class="text-slate-500 hover:text-slate-900 focus:outline-none p-2 rounded-md hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-lg font-bold tracking-wider text-slate-800">VENUE HUB <span class="text-slate-400 font-normal text-sm ml-2 hidden sm:inline">台灣質感空間指南</span></h1>
-            </div>
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="searchInput" placeholder="搜尋名稱或地點..." class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 w-48 sm:w-64 transition-all">
-            </div>
+<!-- ===== TOP BAR ===== -->
+<header class="sticky top-0 z-40 backdrop-blur bg-[rgba(250,248,244,.85)] border-b" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+        <button onclick="goHome()" class="flex items-center gap-2 group">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background:var(--accent)">
+                <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <span class="serif-disp text-lg">Taiwan Venue Hub</span>
+        </button>
+        <button onclick="openNav()" class="w-10 h-10 rounded-xl border flex items-center justify-center hover:bg-black/5" style="border-color:var(--line)" aria-label="選單">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+</header>
+
+<!-- ===== BREADCRUMB ===== -->
+<div id="breadcrumb" class="max-w-6xl mx-auto px-5 pt-5 text-sm hidden" style="color:var(--muted)"></div>
+
+<main id="app" class="max-w-6xl mx-auto px-5 pb-24"></main>
+
+<!-- ===== HAMBURGER NAV DRAWER ===== -->
+<div id="navOverlay" onclick="closeNav()" class="overlay fixed inset-0 bg-black/40 z-40 opacity-0 pointer-events-none"></div>
+<aside id="navDrawer" class="drawer fixed top-0 right-0 h-full w-[88%] max-w-sm bg-[var(--paper)] z-50 shadow-2xl translate-x-full overflow-y-auto">
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="serif-disp text-xl">瀏覽選單</h3>
+            <button onclick="closeNav()" class="w-9 h-9 rounded-lg hover:bg-black/5"><i class="fa-solid fa-xmark"></i></button>
         </div>
-    </header>
-    <!-- MUVIE CINEMA Highlight Video -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h2 class="text-2xl font-bold text-center mb-4">MUVIE CINEMA 精彩影片</h2>
-      <div class="flex justify-center">
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/dyKq86gCuos?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onclick="gtag('event','interest_user',{event_category:'video',event_label:'MUVIE CINEMA'});"></iframe>
-      </div>
-    </section>
-
-    <!-- Overlay for both Drawers -->
-    <div id="mainOverlay" onclick="closeAllDrawers()" class="drawer-overlay fixed inset-0 bg-slate-900/40 z-40"></div>
-
-    <!-- Left Navigation Drawer -->
-    <aside id="navDrawer" class="nav-drawer fixed inset-y-0 left-0 w-64 bg-white shadow-2xl z-50 flex flex-col">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">探索分類</h2>
-            <button onclick="toggleNav()" class="text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <p class="text-xs uppercase tracking-widest mb-2" style="color:var(--muted)">分類</p>
+        <div class="space-y-2 mb-7">
+            <button onclick="goCategory('mall')" class="w-full text-left px-4 py-3 rounded-xl border card-hover" style="border-color:var(--line)"><i class="fa-solid fa-bag-shopping mr-2" style="color:var(--accent)"></i>商場 · 購物中心 / 百貨</button>
+            <button onclick="goCategory('cinema')" class="w-full text-left px-4 py-3 rounded-xl border card-hover" style="border-color:var(--line)"><i class="fa-solid fa-film mr-2" style="color:var(--accent)"></i>電影院 / 影城</button>
         </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <button onclick="setCategory('all')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="all">
-                <i class="fa-solid fa-layer-group w-5 text-center"></i> 顯示全部
-            </button>
-            <button onclick="setCategory('mall')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="mall">
-                <i class="fa-solid fa-bag-shopping w-5 text-center"></i> 百貨商城 / Outlets
-            </button>
-            <button onclick="setCategory('cinema')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition" data-cat="cinema">
-                <i class="fa-solid fa-film w-5 text-center"></i> 電影院 / 影城
-            </button>
-        </nav>
-        <div class="p-6 text-xs text-slate-400">
-            Taiwan Venue Hub © 2026
-        </div>
-    </aside>
+        <p class="text-xs uppercase tracking-widest mb-2" style="color:var(--muted)">連鎖業者一覽 · 查看旗下所有店</p>
+        <div id="chainList" class="flex flex-wrap gap-2"></div>
+    </div>
+</aside>
 
-    <!-- Main Content Grid -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="mb-8 flex justify-between items-end border-b border-slate-200 pb-4">
+<!-- ===== DETAIL PANEL ===== -->
+<div id="detailOverlay" onclick="closeDetails()" class="overlay fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none"></div>
+<aside id="detailDrawer" class="drawer fixed top-0 right-0 h-full w-full max-w-2xl bg-[var(--paper)] z-50 shadow-2xl translate-x-full overflow-y-auto">
+    <div id="detailContent" class="p-0"></div>
+</aside>
+
+<script src="venues.js"></script>
+<script>
+// ---------- helpers ----------
+const $ = (s) => document.querySelector(s);
+const app = $('#app');
+const catMeta = {
+    mall:   { label: '商場', sub: '購物中心 / 百貨公司', icon: 'fa-bag-shopping' },
+    cinema: { label: '電影院', sub: '影城 / 戲院', icon: 'fa-film' },
+};
+let state = { view: 'home', category: null, region: null };
+
+function cityVenues(category, cityCfg) {
+    return venues.filter(v => v.category === category && cityCfg.match.includes(v.city));
+}
+function countForRegion(category, regionCfg) {
+    return regionCfg.cities.reduce((n, c) => n + cityVenues(category, c).length, 0);
+}
+
+// ---------- views ----------
+function goHome() {
+    state = { view:'home', category:null, region:null };
+    closeAllDrawers();
+    setBreadcrumb([]);
+    const totalMall = venues.filter(v=>v.category==='mall').length;
+    const totalCine = venues.filter(v=>v.category==='cinema').length;
+    app.innerHTML = `
+      <section class="fade-in pt-10 pb-14 text-center hero-grain rounded-3xl mt-6 border" style="border-color:var(--line)">
+        <p class="text-xs tracking-[.3em] uppercase mb-4" style="color:var(--muted)">Taiwan · Malls & Cinemas</p>
+        <h1 class="serif-disp text-4xl md:text-6xl leading-tight px-4">探索台灣的<br><span style="color:var(--accent)">質感消費空間</span></h1>
+        <p class="mt-5 text-base md:text-lg max-w-xl mx-auto px-6" style="color:#5a564d">收錄全台 ${venues.length} 處商場與影城，從北到南、本島到離島，依地區深入探索。</p>
+      </section>
+      <div class="grid md:grid-cols-2 gap-6 mt-10 stagger">
+        ${['mall','cinema'].map(cat => `
+          <button onclick="goCategory('${cat}')" class="card-hover group text-left bg-white rounded-3xl border p-8 md:p-10 relative overflow-hidden" style="border-color:var(--line)">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl text-white mb-6" style="background:var(--accent)"><i class="fa-solid ${catMeta[cat].icon}"></i></div>
+            <h2 class="serif-disp text-3xl mb-1">${catMeta[cat].label}</h2>
+            <p class="text-sm mb-6" style="color:var(--muted)">${catMeta[cat].sub}</p>
+            <span class="inline-flex items-center gap-2 text-sm font-medium" style="color:var(--accent)">瀏覽 ${cat==='mall'?totalMall:totalCine} 處據點 <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i></span>
+          </button>`).join('')}
+      </div>`;
+}
+
+function goCategory(category) {
+    state = { view:'region', category, region:null };
+    closeAllDrawers();
+    setBreadcrumb([['首頁', 'goHome()'], [catMeta[category].label, null]]);
+    app.innerHTML = `
+      <section class="fade-in pt-8">
+        <h2 class="serif-disp text-3xl md:text-4xl mb-2"><i class="fa-solid ${catMeta[category].icon} mr-3" style="color:var(--accent)"></i>${catMeta[category].label}</h2>
+        <p class="mb-8" style="color:var(--muted)">選擇地區，深入各縣市探索</p>
+        <div class="space-y-8">
+          ${regionConfig.map(r => `
             <div>
-                <h2 id="pageTitle" class="text-3xl font-bold text-slate-800 tracking-tight">所有空間</h2>
-                <p id="pageSubtitle" class="text-slate-500 mt-1">探索台灣各地的優質休閒去處</p>
-            </div>
-            <div class="text-sm text-slate-400 font-medium"><span id="resultCount">0</span> 個結果</div>
+              <div class="flex items-baseline gap-3 mb-3">
+                <h3 class="serif-disp text-xl">${r.name}</h3>
+                <span class="text-xs" style="color:var(--muted)">${countForRegion(category, r)} 處</span>
+              </div>
+              <div class="flex flex-wrap gap-2.5">
+                ${r.cities.map(c => {
+                    const n = cityVenues(category, c).length;
+                    return `<button onclick="goCity('${r.key}','${c.key}')" class="pill px-4 py-2 rounded-full border text-sm ${n? '' : 'opacity-60'}" style="border-color:var(--line)">${c.name}<span class="ml-1.5 text-xs" style="color:var(--accent)">${n||''}</span></button>`;
+                }).join('')}
+              </div>
+            </div>`).join('')}
         </div>
+      </section>`;
+}
 
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Cards injected by JS -->
+function goCity(regionKey, cityKey) {
+    const region = regionConfig.find(r=>r.key===regionKey);
+    const cityCfg = region.cities.find(c=>c.key===cityKey);
+    const list = cityVenues(state.category, cityCfg);
+    state.view = 'list';
+    closeAllDrawers();
+    setBreadcrumb([['首頁','goHome()'], [catMeta[state.category].label, `goCategory('${state.category}')`], [cityCfg.name, null]]);
+    app.innerHTML = `
+      <section class="fade-in pt-8">
+        <h2 class="serif-disp text-3xl mb-1">${cityCfg.name} · ${catMeta[state.category].label}</h2>
+        <p class="mb-8" style="color:var(--muted)">${list.length} 處據點</p>
+        ${list.length ? `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger">${list.map(cardHTML).join('')}</div>`
+          : `<div class="text-center py-24 rounded-3xl border" style="border-color:var(--line)">
+               <i class="fa-regular fa-face-smile text-4xl mb-4" style="color:var(--accent-soft)"></i>
+               <p class="text-lg">所選區域還沒有${catMeta[state.category].label}進駐</p>
+               <p class="text-sm mt-2" style="color:var(--muted)">換個縣市看看，或回上一頁瀏覽其他地區。</p>
+             </div>`}
+      </section>`;
+}
+
+function cardHTML(v) {
+    return `
+      <button onclick="openDetails('${v.id}')" class="card-hover text-left bg-white rounded-2xl border overflow-hidden flex flex-col" style="border-color:var(--line)">
+        <div class="p-5 flex-1">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:var(--accent-soft);color:#7a4a22">${v.typeLabel}</span>
+            ${v.video?'<span class="text-[11px] px-2 py-0.5 rounded-full bg-black text-white"><i class="fa-solid fa-play mr-1"></i>影片</span>':''}
+          </div>
+          <h3 class="font-bold text-lg leading-snug mb-2">${v.name}</h3>
+          <p class="text-sm leading-relaxed" style="color:#5a564d">${v.shortDesc}</p>
         </div>
-    </main>
-
-    <!-- Right Detail Panel (Slide-over) -->
-    <aside id="detailPanel" class="detail-panel fixed inset-y-0 right-0 w-full md:w-[32rem] bg-white shadow-2xl z-50 flex flex-col">
-        <div class="relative h-48 bg-slate-800 flex-shrink-0 flex flex-col justify-end p-8 overflow-hidden">
-            <!-- Subtle background pattern/gradient -->
-            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-300 via-slate-800 to-slate-900"></div>
-            <button onclick="closeDetails()" class="absolute top-6 right-6 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="relative z-10">
-                <span id="detailBadge" class="inline-block px-3 py-1 bg-white/20 text-white backdrop-blur-md rounded-full text-xs font-medium tracking-wider mb-3"></span>
-                <h2 id="detailTitle" class="text-3xl font-bold text-white tracking-tight leading-tight"></h2>
-            </div>
+        <div class="px-5 py-3 border-t flex items-center justify-between text-xs" style="border-color:var(--line);color:var(--muted)">
+          <span><i class="fa-solid fa-location-dot mr-1"></i>${v.address}</span>
+          <i class="fa-solid fa-arrow-right" style="color:var(--accent)"></i>
         </div>
-        
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-8 bg-slate-50">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
-                <p id="detailDesc" class="text-slate-600 text-lg font-medium leading-relaxed"></p>
-                <div class="mt-4 pt-4 border-t border-slate-100 flex items-start gap-3 text-slate-500">
-                    <i class="fa-solid fa-location-dot mt-1 text-indigo-500"></i>
-                    <span id="detailAddress" class="text-sm"></span>
-                </div>
+      </button>`;
+}
+
+// ---------- detail ----------
+function openDetails(id) {
+    const v = venues.find(x => x.id === id);
+    if (!v) return;
+    const d = v.details || {};
+    const rows = [
+        ['fa-calendar', '開幕時間', d.opened],
+        ['fa-clock-rotate-left', '歷史沿革', d.history],
+        ['fa-circle-info', '營運現況', d.status],
+        ['fa-store', '主力 / 進駐店家', d.anchorStores],
+        ['fa-building', '建築規模', d.building],
+        ['fa-square-parking', '停車資訊', d.parking],
+        ['fa-train-subway', '交通方式', d.transport],
+        ['fa-arrow-trend-up', '未來規劃', d.future],
+    ].filter(r => r[2]);
+    const video = v.video ? `
+        <div class="px-6 md:px-8 pb-2">
+          <div class="rounded-2xl overflow-hidden border" style="border-color:var(--line)">
+            <div style="position:relative;padding-top:56.25%">
+              <iframe src="https://www.youtube.com/embed/${v.video}" title="${v.name} 影片" allowfullscreen
+                style="position:absolute;inset:0;width:100%;height:100%" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
             </div>
+          </div>
+        </div>` : '';
+    $('#detailContent').innerHTML = `
+      <div class="sticky top-0 z-10 backdrop-blur bg-[rgba(250,248,244,.9)] border-b px-6 md:px-8 py-4 flex items-center justify-between" style="border-color:var(--line)">
+        <span class="text-xs px-2.5 py-1 rounded-full" style="background:var(--accent-soft);color:#7a4a22">${v.typeLabel}</span>
+        <button onclick="closeDetails()" class="w-9 h-9 rounded-lg hover:bg-black/5"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-6 md:px-8 pt-6 pb-3">
+        <h2 class="serif-disp text-3xl mb-2">${v.name}</h2>
+        <p class="text-base mb-1" style="color:#5a564d">${v.shortDesc}</p>
+        <p class="text-sm mb-1" style="color:var(--muted)"><i class="fa-solid fa-location-dot mr-1.5"></i>${v.address}</p>
+        ${v.chain?`<button onclick="showChain('${v.chain}')" class="text-sm mt-1" style="color:var(--accent)"><i class="fa-solid fa-layer-group mr-1"></i>查看「${v.chain}」全部分店</button>`:''}
+      </div>
+      ${video}
+      <div class="px-6 md:px-8 py-4 space-y-5 detail-prose">
+        ${rows.map(r => `
+          <div class="flex gap-4">
+            <div class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center" style="background:var(--accent-soft);color:#7a4a22"><i class="fa-solid ${r[0]}"></i></div>
+            <div><h4>${r[1]}</h4><p>${r[2]}</p></div>
+          </div>`).join('')}
+      </div>
+      <div class="h-10"></div>`;
+    openDrawer('#detailDrawer', '#detailOverlay');
+}
 
-            <div class="space-y-6">
-                <div class="info-group">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-regular fa-clock"></i> 開業時間</h3>
-                    <p id="detailOpened" class="text-slate-800 font-medium"></p>
-                </div>
-                
-                <div class="info-group">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 歷史與背景</h3>
-                    <p id="detailHistory" class="text-slate-700 leading-relaxed text-sm"></p>
-                </div>
+// ---------- chain browsing ----------
+function buildChainList() {
+    const chains = [...new Set(venues.filter(v=>v.chain).map(v=>v.chain))].sort();
+    $('#chainList').innerHTML = chains.map(c =>
+        `<button onclick="showChain('${c}')" class="pill px-3 py-1.5 rounded-full border text-sm" style="border-color:var(--line)">${c}</button>`).join('');
+}
+function showChain(chain) {
+    const list = venues.filter(v => v.chain === chain);
+    state.view = 'list';
+    closeAllDrawers();
+    setBreadcrumb([['首頁','goHome()'], [`連鎖：${chain}`, null]]);
+    app.innerHTML = `
+      <section class="fade-in pt-8">
+        <h2 class="serif-disp text-3xl mb-1"><i class="fa-solid fa-layer-group mr-2" style="color:var(--accent)"></i>${chain}</h2>
+        <p class="mb-8" style="color:var(--muted)">旗下 ${list.length} 處據點</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger">${list.map(cardHTML).join('')}</div>
+      </section>`;
+}
 
-                <div class="info-group">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> 現況介紹</h3>
-                    <p id="detailStatus" class="text-slate-700 leading-relaxed text-sm"></p>
-                </div>
+// ---------- breadcrumb ----------
+function setBreadcrumb(parts) {
+    const bc = $('#breadcrumb');
+    if (!parts.length) { bc.classList.add('hidden'); return; }
+    bc.classList.remove('hidden');
+    bc.innerHTML = parts.map((p,i) => {
+        const sep = i < parts.length-1 ? ' <i class="fa-solid fa-angle-right text-xs mx-1 opacity-50"></i> ' : '';
+        return (p[1] ? `<button onclick="${p[1]}" class="hover:underline" style="color:var(--accent)">${p[0]}</button>` : `<span style="color:var(--ink)">${p[0]}</span>`) + sep;
+    }).join('');
+}
 
-                <div class="info-group">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-star"></i> 主力配置 / 商店</h3>
-                    <p id="detailAnchor" class="text-slate-800 font-medium text-sm bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50"></p>
-                </div>
+// ---------- drawers ----------
+function openDrawer(drawer, overlay) {
+    $(drawer).classList.remove('translate-x-full');
+    const o = $(overlay); o.classList.remove('opacity-0','pointer-events-none');
+    document.body.style.overflow = 'hidden';
+}
+function closeDrawer(drawer, overlay) {
+    $(drawer).classList.add('translate-x-full');
+    const o = $(overlay); o.classList.add('opacity-0','pointer-events-none');
+    document.body.style.overflow = '';
+}
+function openNav(){ buildChainList(); openDrawer('#navDrawer','#navOverlay'); }
+function closeNav(){ closeDrawer('#navDrawer','#navOverlay'); }
+function closeDetails(){ closeDrawer('#detailDrawer','#detailOverlay'); }
+function closeAllDrawers(){ closeNav(); closeDetails(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllDrawers(); });
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="info-group bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-regular fa-building"></i> 建築樓層</h3>
-                        <p id="detailBuilding" class="text-slate-700 text-sm"></p>
-                    </div>
-                    <div class="info-group bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-square-parking"></i> 停車資訊</h3>
-                        <p id="detailParking" class="text-slate-700 text-sm"></p>
-                    </div>
-                </div>
-
-                <div class="info-group bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-train-subway"></i> 乘車指南</h3>
-                    <p id="detailTransport" class="text-slate-700 text-sm leading-relaxed"></p>
-                </div>
-
-                <div class="info-group">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-seedling"></i> 未來展望</h3>
-                    <p id="detailFuture" class="text-slate-700 text-sm italic border-l-4 border-slate-300 pl-3"></p>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Load Data and Logic -->
-    <script src="venues.js"></script>
-    <script>
-        let currentCategory = 'all';
-
-        // DOM Elements
-        const resultsGrid = document.getElementById('resultsGrid');
-        const searchInput = document.getElementById('searchInput');
-        const mainOverlay = document.getElementById('mainOverlay');
-        const navDrawer = document.getElementById('navDrawer');
-        const detailPanel = document.getElementById('detailPanel');
-        const resultCount = document.getElementById('resultCount');
-        const pageTitle = document.getElementById('pageTitle');
-
-        // Render Cards
-        const renderCards = (data) => {
-            if(data.length === 0) {
-                resultsGrid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">找不到符合條件的空間。</div>`;
-                resultCount.innerText = 0;
-                return;
-            }
-
-            resultCount.innerText = data.length;
-            resultsGrid.innerHTML = data.map(item => {
-                const icon = item.category === 'mall' ? 'fa-bag-shopping' : 'fa-film';
-                const color = item.category === 'mall' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50';
-                
-                return `
-                <div onclick="openDetails('${item.id}')" class="venue-card cursor-pointer group bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-100 group-hover:bg-indigo-500 transition-colors"></div>
-                    
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 ${color} rounded-md text-xs font-bold tracking-wider">
-                            <i class="fa-solid ${icon}"></i> ${item.typeLabel}
-                        </span>
-                        <span class="text-slate-400 text-xs font-medium border border-slate-200 px-2 py-0.5 rounded">${item.region}</span>
-                    </div>
-                    
-                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors leading-tight">${item.name}</h3>
-                    <p class="text-slate-500 text-sm flex-1 mb-4 leading-relaxed">${item.shortDesc}</p>
-                    
-                    <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
-                        <span class="text-slate-400 text-xs truncate max-w-[80%]"><i class="fa-solid fa-location-dot mr-1"></i>${item.address}</span>
-                        <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
-                            <i class="fa-solid fa-arrow-right text-sm"></i>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-        };
-
-        // Filter Logic
-        const filterData = () => {
-            const query = searchInput.value.toLowerCase();
-            const filtered = venues.filter(v => {
-                const matchCat = currentCategory === 'all' || v.category === currentCategory;
-                const matchSearch = v.name.toLowerCase().includes(query) || v.address.toLowerCase().includes(query);
-                return matchCat && matchSearch;
-            });
-            renderCards(filtered);
-        };
-
-        // Category Selection
-        const setCategory = (cat) => {
-            currentCategory = cat;
-            
-            // Update UI
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.cat === cat) {
-                    btn.classList.add('bg-indigo-50', 'text-indigo-700');
-                    btn.classList.remove('text-slate-700');
-                } else {
-                    btn.classList.remove('bg-indigo-50', 'text-indigo-700');
-                    btn.classList.add('text-slate-700');
-                }
-            });
-
-            // Update Title
-            if(cat === 'mall') pageTitle.innerText = "百貨商城 / Outlets";
-            else if(cat === 'cinema') pageTitle.innerText = "電影院 / 影城";
-            else pageTitle.innerText = "所有空間";
-
-            filterData();
-            closeNav();
-        };
-
-        // Open Detail Panel
-        const openDetails = (id) => {
-            const venue = venues.find(v => v.id === id);
-            if(!venue) return;
-
-            document.getElementById('detailTitle').innerText = venue.name;
-            document.getElementById('detailBadge').innerHTML = `<i class="fa-solid ${venue.category === 'mall' ? 'fa-bag-shopping' : 'fa-film'} mr-1"></i> ${venue.typeLabel}`;
-            document.getElementById('detailDesc').innerText = venue.shortDesc;
-            document.getElementById('detailAddress').innerText = venue.address;
-            
-            // Detail Fields
-            document.getElementById('detailOpened').innerText = venue.details.opened || '無資料';
-            document.getElementById('detailHistory').innerText = venue.details.history || '無資料';
-            document.getElementById('detailStatus').innerText = venue.details.status || '無資料';
-            document.getElementById('detailAnchor').innerText = venue.details.anchorStores || '無資料';
-            document.getElementById('detailBuilding').innerText = venue.details.building || '無資料';
-            document.getElementById('detailParking').innerText = venue.details.parking || '無資料';
-            document.getElementById('detailTransport').innerText = venue.details.transport || '無資料';
-            document.getElementById('detailFuture').innerText = venue.details.future || '無資料';
-
-            detailPanel.classList.add('active');
-            mainOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent body scroll
-        };
-
-        // Drawer Controls
-        const toggleNav = () => {
-            const isActive = navDrawer.classList.contains('active');
-            if(isActive) closeAllDrawers();
-            else {
-                navDrawer.classList.add('active');
-                mainOverlay.classList.add('active');
-            }
-        };
-
-        const closeNav = () => {
-            navDrawer.classList.remove('active');
-            if(!detailPanel.classList.contains('active')) {
-                mainOverlay.classList.remove('active');
-            }
-        };
-
-        const closeDetails = () => {
-            detailPanel.classList.remove('active');
-            if(!navDrawer.classList.contains('active')) {
-                mainOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        };
-
-        const closeAllDrawers = () => {
-            navDrawer.classList.remove('active');
-            detailPanel.classList.remove('active');
-            mainOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        };
-
-        // Event Listeners
-        searchInput.addEventListener('input', filterData);
-
-        // Init
-        setCategory('all');
-    </script>
+// ---------- init ----------
+goHome();
+</script>
 </body>
 </html>
